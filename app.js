@@ -1,5 +1,4 @@
 const express = require('express');
-const fetch = require('node-fetch');
 const { Shazam } = require('node-shazam');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
@@ -13,13 +12,11 @@ const SUPPORTED_AUDIO = ['.mp3', '.wav', '.m4a', '.aac', '.ogg'];
 const SUPPORTED_VIDEO = ['.mp4', '.mov', '.avi', '.mkv'];
 
 app.use(express.json());
-// CORS para permitir acceso desde clientes externos
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
   next();
 });
 
-// Extraer audio de video usando FFmpeg
 const extractAudioFromVideo = (videoPath, cb) => {
   tmp.file({ postfix: '.mp3' }, (err, audioPath, fd, cleanupAudio) => {
     if (err) return cb(err);
@@ -33,7 +30,6 @@ const extractAudioFromVideo = (videoPath, cb) => {
   });
 };
 
-// Validar extensión de archivo
 function getFileType(fileUrl) {
   const ext = path.extname(fileUrl).toLowerCase();
   if (SUPPORTED_AUDIO.includes(ext)) return 'audio';
@@ -41,7 +37,6 @@ function getFileType(fileUrl) {
   return null;
 }
 
-// Reconocer canción
 const recognizeSong = async (audioPath, language = 'en-US') => {
   try {
     return await shazam.recognise(audioPath, language);
@@ -50,7 +45,6 @@ const recognizeSong = async (audioPath, language = 'en-US') => {
   }
 };
 
-// Endpoint principal
 app.get('/identify', async (req, res) => {
   const { fileUrl, lang } = req.query;
   const language = lang || 'en-US';
@@ -64,7 +58,6 @@ app.get('/identify', async (req, res) => {
     return res.status(400).json({ error: 'Unsupported file type.' });
   }
 
-  // Descargar archivo remoto a temporal
   tmp.file({ postfix: path.extname(fileUrl) }, async (err, tempFilePath, fd, cleanupTemp) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to create temp file.' });
@@ -72,7 +65,7 @@ app.get('/identify', async (req, res) => {
 
     let cleanupAudio = null;
     try {
-      // Descargar como stream para archivos grandes
+      // fetch es global en Node 18+
       const response = await fetch(fileUrl, { timeout: 15000 });
       if (!response.ok) return res.status(400).json({ error: 'Unable to download file.' });
 
@@ -109,7 +102,6 @@ app.get('/identify', async (req, res) => {
   });
 });
 
-// Fallback 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found.' });
 });
