@@ -9,11 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "fluent-ffmpeg": "^2.1.2",
-    "node-fetch": "^2.6.1",
-    "node-shazam": "^1.2.7",
-    "tmp": "^0.2.1"
+    "express": "*",
+    "fluent-ffmpeg": "*",
+    "node-fetch": "*",
+    "node-shazam": "*",
+    "tmp": "*"
   },
   "engines": {
     "node": ">=14.0.0"
